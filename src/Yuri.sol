@@ -2,35 +2,35 @@
 pragma solidity ^0.8.15;
 
 /**
- * @title Marvels NFT
+ * @title Yuri NFT
  * @author Ahiara Ikechukwu Marvellous
  * @notice A 100 NFT token that can be collected by anyone
  */
 
-import "solmate/src/tokens/ERC721.sol";
-import "solmate/src/auth/Owned.sol";
+import "@solmate/tokens/ERC721.sol";
+import "@solmate/auth/Owned.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract Yuri is ERC721, Owned {
     using Strings for uint256;
-    uint8 private constant _maxSupply = 100;
+    uint256 private constant _maxSupply = 100;
+    uint256 public counter;
     uint256 private constant MINT_PRICE = 0.01 ether;
 
-    uint8 private _counter;
-
-    constructor(address _owner) ERC721("Marvels", "MARV") Owned(_owner) {}
+    constructor(address _owner) ERC721("Yuri", "YURI") Owned(_owner) {}
 
     function _baseURI() internal pure returns (string memory) {
         return
             "https://bafybeibhqislilo36kh2bhepzilr44hgfzpkngnf2x3tbuhopg4qb3fuha.ipfs.dweb.link/metadata/";
     }
 
-    function totalSupply() public view returns (uint8) {
-        return _counter;
+    function totalSupply() public view returns (uint256) {
+        return counter;
     }
 
-    function mint() external payable returns (uint8) {
-        mint(1);
+    function mint() external payable returns (uint256) {
+        uint256[] memory ids = mint(1);
+        return ids[0];
     }
 
     /**
@@ -40,18 +40,17 @@ contract Yuri is ERC721, Owned {
      * Emits a {Transfer} event.
      */
 
-    function mint(uint256 _quantity)
-        external
-        payable
-        returns (uint256[] memory)
-    {
-        require(_counter < _maxSupply, "No more tokens to mint");
-        require(quantity * MINT_PRICE == msg.value, "Fee is incorrect");
+    function mint(uint256 _quantity) public payable returns (uint256[] memory) {
+        require(counter < _maxSupply, "Max supply reached");
+        require(
+            _quantity * MINT_PRICE == msg.value,
+            "msg.value is not equal to MINT_PRICE"
+        );
         require(_quantity <= 5, "Can't mint more than 5");
         uint256[] memory ids = new uint256[](_quantity);
 
         for (uint256 i = 0; i < _quantity; i++) {
-            uint256 id = _counter++;
+            uint256 id = counter++;
 
             _mint(msg.sender, id);
             ids[i] = id;
