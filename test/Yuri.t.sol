@@ -33,12 +33,49 @@ contract YuriTest is Test {
         assertEq(yuri.totalSupply(), 100);
     }
 
+    function testCanMintOneToken() public {
+        address alice = vm.addr(2);
+        vm.deal(alice, 1 ether);
+        vm.prank(alice);
+        yuri.mint{value: 0.01 ether}();
+        assertEq(yuri.totalSupply(), 1);
+    }
+
+    function testCanMintThreeTokens() public {
+        address alice = vm.addr(2);
+        vm.deal(alice, 1 ether);
+        vm.prank(alice);
+        yuri.mint{value: 0.03 ether}(3);
+        assertEq(yuri.totalSupply(), 3);
+    }
+
     function testCannotMintIfNotEqualToFee() public {
         address alice = vm.addr(2);
-        vm.deal(alice, 0.001 ether);
+        vm.deal(alice, 1 ether);
         vm.prank(alice);
         vm.expectRevert("msg.value is not equal to MINT_PRICE");
-        yuri.mint();
+        yuri.mint{value: 0.001 ether}();
         assertEq(yuri.totalSupply(), 0);
+    }
+
+    function testCannotMintPassFiveTokens() public {
+        address alice = vm.addr(2);
+        vm.deal(alice, 1 ether);
+        vm.prank(alice);
+        vm.expectRevert("Can't mint more than 5");
+        yuri.mint{value: 0.06 ether}(6);
+        assertEq(yuri.totalSupply(), 0);
+    }
+
+    function testOwnerCanWithdrawFunds() public {
+        yuri.mint{value: 0.05 ether}(5);
+        assertEq(yuri.totalSupply(), 5);
+        assert(address(yuri).balance == 0.05 ether);
+
+        uint256 yuriBalance = address(yuri).balance;
+        uint256 priorOwnerBalance = address(owner).balance;
+        vm.prank(owner);
+        yuri.withdraw();
+        assertEq(address(owner).balance, priorOwnerBalance + yuriBalance);
     }
 }

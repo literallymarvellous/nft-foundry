@@ -42,11 +42,11 @@ contract Yuri is ERC721, Owned {
 
     function mint(uint256 _quantity) public payable returns (uint256[] memory) {
         require(counter < _maxSupply, "Max supply reached");
+        require(_quantity <= 5, "Can't mint more than 5");
         require(
             _quantity * MINT_PRICE == msg.value,
             "msg.value is not equal to MINT_PRICE"
         );
-        require(_quantity <= 5, "Can't mint more than 5");
         uint256[] memory ids = new uint256[](_quantity);
 
         for (uint256 i = 0; i < _quantity; i++) {
