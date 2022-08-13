@@ -24,17 +24,23 @@ contract Yuri is ERC721, Owned {
             "https://bafybeibhqislilo36kh2bhepzilr44hgfzpkngnf2x3tbuhopg4qb3fuha.ipfs.dweb.link/metadata/";
     }
 
+    /**
+     * @notice returns current number of tokens minted
+     */
     function totalSupply() public view returns (uint256) {
         return counter;
     }
 
+    /**
+     * @notice mints a new single token to the caller
+     */
     function mint() external payable returns (uint256) {
         uint256[] memory ids = mint(1);
         return ids[0];
     }
 
     /**
-     * @notice Mints tokenId and transfers it to `to`.
+     * @notice Mints tokenId and transfers it to msg.sender.
      * @param _quantity number of tokens to mint
      *
      * Emits a {Transfer} event.

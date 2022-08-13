@@ -9,10 +9,18 @@ contract YuriTest is Test {
 
     Yuri yuri;
     address owner;
+    address alice;
+    address bob;
 
     function setUp() public {
         owner = vm.addr(1);
         yuri = new Yuri(owner);
+
+        alice = vm.addr(2);
+        vm.deal(alice, 1 ether);
+
+        bob = vm.addr(3);
+        vm.deal(bob, 1 ether);
 
         vm.label(address(this), "YuriTest");
         vm.label(address(yuri), "YuriNFT");
@@ -34,24 +42,18 @@ contract YuriTest is Test {
     }
 
     function testCanMintOneToken() public {
-        address alice = vm.addr(2);
-        vm.deal(alice, 1 ether);
         vm.prank(alice);
         yuri.mint{value: 0.01 ether}();
         assertEq(yuri.totalSupply(), 1);
     }
 
     function testCanMintThreeTokens() public {
-        address alice = vm.addr(2);
-        vm.deal(alice, 1 ether);
         vm.prank(alice);
         yuri.mint{value: 0.03 ether}(3);
         assertEq(yuri.totalSupply(), 3);
     }
 
     function testCannotMintIfNotEqualToFee() public {
-        address alice = vm.addr(2);
-        vm.deal(alice, 1 ether);
         vm.prank(alice);
         vm.expectRevert("msg.value is not equal to MINT_PRICE");
         yuri.mint{value: 0.001 ether}();
@@ -59,8 +61,6 @@ contract YuriTest is Test {
     }
 
     function testCannotMintPassFiveTokens() public {
-        address alice = vm.addr(2);
-        vm.deal(alice, 1 ether);
         vm.prank(alice);
         vm.expectRevert("Can't mint more than 5");
         yuri.mint{value: 0.06 ether}(6);
@@ -77,5 +77,16 @@ contract YuriTest is Test {
         vm.prank(owner);
         yuri.withdraw();
         assertEq(address(owner).balance, priorOwnerBalance + yuriBalance);
+    }
+
+    function testBalanceOfAccountAfterMint() public {
+        uint256 priorOwnerBalance = address(bob).balance;
+        console2.log("priorOwnerBalance: ", priorOwnerBalance);
+
+        uint256 mintPrice = 0.03 ether;
+        vm.prank(bob);
+        yuri.mint{value: mintPrice}(3);
+        console2.log("address(bob).balance: ", address(bob).balance);
+        assertEq(address(bob).balance, priorOwnerBalance - mintPrice);
     }
 }
