@@ -27,32 +27,41 @@ contract YuriTest is Test {
         vm.label(owner, "YuriOwner");
     }
 
+    /// @notice Test that owner is set
     function testOwner() public {
         assertTrue(yuri.owner() == owner);
     }
 
+    /// @notice test that minting above 100 fails
     function testCannotMintMoreThanMaxSupply() public {
+        // Retriving "counter" storage location to mock mint count as 100
         uint256 slot = stdstore.target(address(yuri)).sig("counter()").find();
         bytes32 loc = bytes32(slot);
+
+        // mocking 100 mints by setting counter storge to 100
         bytes32 mockedCounter = bytes32(abi.encode(100));
         vm.store(address(yuri), loc, mockedCounter);
+
         vm.expectRevert("Max supply reached");
         yuri.mint();
         assertEq(yuri.totalSupply(), 100);
     }
 
+    /// @notice Test that single token mint works
     function testCanMintOneToken() public {
         vm.prank(alice);
         yuri.mint{value: 0.01 ether}();
         assertEq(yuri.totalSupply(), 1);
     }
 
+    /// @notice Test that multiple token mint works
     function testCanMintThreeTokens() public {
         vm.prank(alice);
         yuri.mint{value: 0.03 ether}(3);
         assertEq(yuri.totalSupply(), 3);
     }
 
+    /// @notice Test that minting without token fee fails
     function testCannotMintIfNotEqualToFee() public {
         vm.prank(alice);
         vm.expectRevert("msg.value is not equal to MINT_PRICE");
@@ -60,6 +69,7 @@ contract YuriTest is Test {
         assertEq(yuri.totalSupply(), 0);
     }
 
+    /// @notice Test that minting >5 tokens fails
     function testCannotMintPassFiveTokens() public {
         vm.prank(alice);
         vm.expectRevert("Can't mint more than 5");
@@ -67,6 +77,7 @@ contract YuriTest is Test {
         assertEq(yuri.totalSupply(), 0);
     }
 
+    /// @notice Test that owner can withdraw funds
     function testOwnerCanWithdrawFunds() public {
         yuri.mint{value: 0.05 ether}(5);
         assertEq(yuri.totalSupply(), 5);
@@ -79,7 +90,8 @@ contract YuriTest is Test {
         assertEq(address(owner).balance, priorOwnerBalance + yuriBalance);
     }
 
-    function testBalanceOfAccountAfterMint() public {
+    /// @notice Test that balance matches up with mint fee(s)
+    function testBalanceOfAccountAfterThreeMints() public {
         uint256 priorOwnerBalance = address(bob).balance;
         console2.log("priorOwnerBalance: ", priorOwnerBalance);
 
