@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.15;
 
 import "forge-std/Script.sol";
+import "forge-std/Test.sol";
 import "../src/Yuri.sol";
 
 contract ContractScript is Script {
-    function run() public {
+    function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
